@@ -1,0 +1,26 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdk rootProject.ext.android["compileSdk"]
+    buildToolsVersion rootProject.ext.android["buildToolsVersion"]
+
+    defaultConfig {
+        minSdk rootProject.ext.android["minSdk"]
+        targetSdk rootProject.ext.android["targetSdk"]
+        versionCode 20211027
+        versionName "5.1.3.5"
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            res.srcDirs = ['res']
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+}
+
+dependencies {
+    api fileTree(dir: 'libs', include: ['*.jar','*.aar'])
+    api rootProject.ext.dependencies["gson"]
+}

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.imooc.meet">
+
+    <application
+        android:name=".base.BaseApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:requestLegacyExternalStorage="true"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Meet.NoActionBar"
+        tools:ignore="AllowBackup"
+        tools:targetApi="n">
+
+        <!--高德地图-->
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="93bcb00ea7e3859837d38828342ae8a0" />
+
+        <!-- OPPO -->
+        <meta-data
+            android:name="android.max_aspect"
+            android:value="2.2" />
+
+        <!-- 小米 -->
+        <meta-data
+            android:name="notch.config"
+            android:value="portrait|landscape" />
+
+        <service
+            android:name=".service.CloudService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver android:name=".receiver.SealNotificationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="io.rong.push.intent.MESSAGE_ARRIVED" />
+                <action android:name="io.rong.push.intent.MESSAGE_CLICKED" />
+                <action android:name="io.rong.push.intent.THIRD_PARTY_PUSH_STATE" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.imooc.meet.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+        <activity
+            android:name=".ui.IndexActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Meet.NoActionBar">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.GuideActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.NoActionBar" />
+
+        <activity
+            android:name=".ui.LoginActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.NoActionBar" />
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.NoActionBar" />
+
+        <activity
+            android:name=".ui.FirstUploadActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.ActionBar" />
+
+        <activity
+            android:name=".ui.AddFriendActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.ActionBar" />
+
+        <activity
+            android:name=".ui.ContactFriendActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.ActionBar" />
+
+        <activity
+            android:name=".ui.UserInfoActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.NoActionBar" />
+
+        <activity
+            android:name=".ui.NewFriendActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.ActionBar" />
+
+        <activity
+            android:name=".ui.ChatActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.ActionBar" />
+
+        <activity
+            android:name=".ui.ImagePreviewActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.NoActionBar" />
+
+        <activity
+            android:name=".ui.LocationActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Meet.ActionBar" />
+    </application>
+
+</manifest>

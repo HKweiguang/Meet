@@ -18,17 +18,17 @@
         android:orientation="horizontal">
 
         <EditText
-            android:maxLines="1"
             android:id="@+id/et_search"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="1"
             android:background="@android:color/transparent"
             android:hint="搜索"
-            android:paddingStart="10dp"
-            tools:ignore="RtlSymmetry"
             android:importantForAutofill="no"
-            android:inputType="text" />
+            android:inputType="text"
+            android:maxLines="1"
+            android:paddingStart="10dp"
+            tools:ignore="RtlSymmetry" />
 
         <ImageView
             android:id="@+id/iv_poi"
@@ -39,6 +39,4 @@
             tools:ignore="ContentDescription" />
 
     </LinearLayout>
-
-
 </RelativeLayout>

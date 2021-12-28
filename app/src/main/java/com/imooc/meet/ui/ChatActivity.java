@@ -387,7 +387,9 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
                     }
                     break;
                 case LOCATION_REQUEST_CODE:
-
+                    double la = data.getDoubleExtra("la", 0);
+                    double lo = data.getDoubleExtra("lo", 0);
+                    String address = data.getStringExtra("address");
                     break;
             }
 

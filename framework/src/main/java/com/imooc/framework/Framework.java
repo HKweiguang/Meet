@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.imooc.framework.cloud.CloudManager;
 import com.imooc.framework.bmob.BmobManager;
+import com.imooc.framework.manager.MapManager;
 import com.imooc.framework.utils.LogUtils;
 import com.imooc.framework.utils.SpUtils;
 
@@ -40,7 +41,7 @@ public class Framework {
         BmobManager.getInstance().initBmob(mContext);
         CloudManager.getInstance().initCloud(mContext);
         LitePal.initialize(mContext);
-//        MapManager.getInstance().initMap(mContext);
+        MapManager.getInstance().initMap(mContext);
 //        WindowHelper.getInstance().initWindow(mContext);
 //        CrashReport.initCrashReport(mContext, BUGLY_KEY, BuildConfig.LOG_DEBUG);
 //        ZXingLibrary.initDisplayOpinion(mContext);

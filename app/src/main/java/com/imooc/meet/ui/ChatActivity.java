@@ -137,6 +137,10 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
                         holder.getView(R.id.iv_left_img).setOnClickListener(v -> ImagePreviewActivity.startActivity(ChatActivity.this, true, model.getImgUrl()));
                         break;
                     case TYPE_LEFT_LOCATION:
+                        holder.setImageUrl(ChatActivity.this, R.id.iv_left_photo, otherUserPhoto);
+                        holder.setImageUrl(ChatActivity.this, R.id.iv_left_location_img, model.getMapUrl());
+                        holder.setText(R.id.tv_left_address, model.getAddress());
+                        holder.itemView.setOnClickListener(v -> LocationActivity.startActivity(ChatActivity.this, false, model.getLa(), model.getLo(), model.getAddress(), LOCATION_REQUEST_CODE));
                         break;
                     case TYPE_RIGHT_TEXT:
                         holder.setText(R.id.tv_right_text, model.getText());
@@ -157,6 +161,10 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
                         }
                         break;
                     case TYPE_RIGHT_LOCATION:
+                        holder.setImageUrl(ChatActivity.this, R.id.iv_right_photo, mineUserPhoto);
+                        holder.setImageUrl(ChatActivity.this, R.id.iv_right_location_img, model.getMapUrl());
+                        holder.setText(R.id.tv_right_address, model.getAddress());
+                        holder.itemView.setOnClickListener(v -> LocationActivity.startActivity(ChatActivity.this, false, model.getLa(), model.getLo(), model.getAddress(), LOCATION_REQUEST_CODE));
                         break;
                 }
             }
@@ -343,6 +351,15 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
         baseAddItem(model);
     }
 
+    private void addLocation(int index, double la, double lo, String address) {
+        ChatModel model = new ChatModel();
+        if (index == 0) {
+            model.setType(TYPE_LEFT_IMAGE);
+        } else {
+            model.setType(TYPE_RIGHT_IMAGE);
+        }
+    }
+
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
@@ -375,6 +392,8 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (data == null) return;
+
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case FileHelper.CAMERA_REQUEST_CODE:

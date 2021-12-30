@@ -115,6 +115,7 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
         btn_send_msg.setOnClickListener(this);
         ll_camera.setOnClickListener(this);
         ll_pic.setOnClickListener(this);
+        ll_location.setOnClickListener(this);
 
         chatModelAdapter = new CommonAdapter<>(mList, new CommonAdapter.OnMoreBindDataListener<ChatModel>() {
             @Override

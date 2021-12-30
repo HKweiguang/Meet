@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.amap.api.services.core.AMapException;
 import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.core.ServiceSettings;
 import com.amap.api.services.geocoder.GeocodeAddress;
 import com.amap.api.services.geocoder.GeocodeQuery;
 import com.amap.api.services.geocoder.GeocodeResult;
@@ -40,6 +41,8 @@ public class MapManager {
     }
 
     public void initMap(Context mContext) {
+        ServiceSettings.updatePrivacyShow(mContext, true, true);
+        ServiceSettings.updatePrivacyAgree(mContext, true);
         try {
             geocodeSearch = new GeocodeSearch(mContext);
             geocodeSearch.setOnGeocodeSearchListener(searchListener);

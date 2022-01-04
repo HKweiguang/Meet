@@ -86,8 +86,6 @@ public class ChatRecordFragment extends BaseFragment implements SwipeRefreshLayo
         mChatRecordView.addItemDecoration(new DividerItemDecoration(requireActivity(), DividerItemDecoration.VERTICAL));
         mChatRecordView.setAdapter(chatRecordModelCommonAdapter);
 
-        queryChatRecord();
-
         return view;
     }
 

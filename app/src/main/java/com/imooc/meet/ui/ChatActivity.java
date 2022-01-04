@@ -27,6 +27,7 @@ import com.imooc.framework.event.EventManager;
 import com.imooc.framework.event.MessageEvent;
 import com.imooc.framework.gson.TextBean;
 import com.imooc.framework.helper.FileHelper;
+import com.imooc.framework.manager.MapManager;
 import com.imooc.framework.utils.CommonUtils;
 import com.imooc.framework.utils.LogUtils;
 import com.imooc.meet.R;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.Objects;
 
 import io.rong.imlib.RongIMClient;
+import io.rong.imlib.location.message.LocationMessage;
 import io.rong.imlib.model.Message;
 import io.rong.message.ImageMessage;
 import io.rong.message.TextMessage;
@@ -254,6 +256,12 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
                     }
                     break;
                 case CloudManager.MSG_LOCATION_NAME:
+                    LocationMessage locationMessage = (LocationMessage) m.getContent();
+                    if (m.getSenderUserId().equals(otherUserId)) {
+                        addLocation(0, locationMessage.getLat(), locationMessage.getLng(), locationMessage.getPoi());
+                    } else {
+                        addLocation(1, locationMessage.getLat(), locationMessage.getLng(), locationMessage.getPoi());
+                    }
                     break;
             }
         }
@@ -351,13 +359,26 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
         baseAddItem(model);
     }
 
+    /**
+     * 添加地址
+     *
+     * @param index   0:左边    1:右边
+     * @param la      经度
+     * @param lo      维度
+     * @param address 地址
+     */
     private void addLocation(int index, double la, double lo, String address) {
         ChatModel model = new ChatModel();
         if (index == 0) {
-            model.setType(TYPE_LEFT_IMAGE);
+            model.setType(TYPE_LEFT_LOCATION);
         } else {
-            model.setType(TYPE_RIGHT_IMAGE);
+            model.setType(TYPE_RIGHT_LOCATION);
         }
+        model.setLa(la);
+        model.setLo(lo);
+        model.setAddress(address);
+        model.setMapUrl(MapManager.getInstance().getMapUrl(la, lo));
+        baseAddItem(model);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -410,6 +431,10 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
                     double la = data.getDoubleExtra("la", 0);
                     double lo = data.getDoubleExtra("lo", 0);
                     String address = data.getStringExtra("address");
+
+                    CloudManager.getInstance().sendLocationMessage(otherUserId, la, lo, address);
+
+                    addLocation(1, la, lo, address);
                     break;
             }
 
@@ -432,6 +457,9 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
                 case EventManager.FLAG_SEND_IMAGE:
                     LogUtils.i("event: " + event);
                     addImage(0, event.getImgUrl());
+                    break;
+                case EventManager.FLAG_SEND_LOCATION:
+                    addLocation(0, event.getLa(), event.getLo(), event.getAddress());
                     break;
             }
         }

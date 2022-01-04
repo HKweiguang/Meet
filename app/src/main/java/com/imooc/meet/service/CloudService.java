@@ -3,6 +3,7 @@ package com.imooc.meet.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Message;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
@@ -27,6 +28,7 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.rong.imlib.location.message.LocationMessage;
 import io.rong.message.ImageMessage;
 import io.rong.message.TextMessage;
 
@@ -108,17 +110,27 @@ public class CloudService extends Service {
                     }
                     break;
                 case CloudManager.MSG_IMAGE_NAME:
-                    ImageMessage imageMessage = (ImageMessage) message.getContent();
-                    String url = imageMessage.getRemoteUri().toString();
-                    if (!TextUtils.isEmpty(url)) {
-                        MessageEvent event = new MessageEvent(EventManager.FLAG_SEND_IMAGE);
-                        event.setImgUrl(url);
-                        event.setUserId(message.getSenderUserId());
-                        EventManager.post(event);
+                    try {
+                        ImageMessage imageMessage = (ImageMessage) message.getContent();
+                        String url = imageMessage.getRemoteUri().toString();
+                        if (!TextUtils.isEmpty(url)) {
+                            MessageEvent event = new MessageEvent(EventManager.FLAG_SEND_IMAGE);
+                            event.setImgUrl(url);
+                            event.setUserId(message.getSenderUserId());
+                            EventManager.post(event);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                     break;
                 case CloudManager.MSG_LOCATION_NAME:
-
+                    LocationMessage locationMessage = (LocationMessage) message.getContent();
+                    MessageEvent event = new MessageEvent(EventManager.FLAG_SEND_LOCATION);
+                    event.setLa(locationMessage.getLat());
+                    event.setLo(locationMessage.getLng());
+                    event.setAddress(locationMessage.getPoi());
+                    event.setUserId(message.getSenderUserId());
+                    EventManager.post(event);
                     break;
             }
             return false;

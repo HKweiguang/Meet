@@ -12,6 +12,7 @@ import java.util.List;
 
 import io.rong.imlib.IRongCallback;
 import io.rong.imlib.RongIMClient;
+import io.rong.imlib.location.message.LocationMessage;
 import io.rong.imlib.model.Conversation;
 import io.rong.imlib.model.Message;
 import io.rong.message.ImageMessage;
@@ -184,7 +185,7 @@ public class CloudManager {
     /**
      * 发送图片消息
      *
-     * @param file 图片
+     * @param file     图片
      * @param targetId 目标
      */
     public void sendImageMessage(File file, String targetId) {
@@ -197,6 +198,22 @@ public class CloudManager {
                 null,
                 sendImageMessageCallback
         );
+    }
+
+    /**
+     * 发送位置信息
+     *
+     * @param mTargetId 目标
+     * @param lat       经度
+     * @param lng       纬度
+     * @param poi       描述
+     */
+    public void sendLocationMessage(String mTargetId, double lat, double lng, String poi) {
+        LocationMessage locationMessage = LocationMessage.obtain(lat, lng, poi, null);
+        io.rong.imlib.model.Message message = io.rong.imlib.model.Message.obtain(
+                mTargetId, Conversation.ConversationType.PRIVATE, locationMessage);
+        RongIMClient.getInstance().sendLocationMessage(message,
+                null, null, iSendMessageCallback);
     }
 
     /**
@@ -223,6 +240,7 @@ public class CloudManager {
      * @param callback 回调
      */
     public void getRemoteHistoryMessages(String targetId, RongIMClient.ResultCallback<List<Message>> callback) {
-        RongIMClient.getInstance().getRemoteHistoryMessages(Conversation.ConversationType.PRIVATE, targetId, 0, 20, callback);
+        RongIMClient.getInstance().getRemoteHistoryMessages(Conversation.ConversationType.PRIVATE
+                , targetId, 0, 20, callback);
     }
 }

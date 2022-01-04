@@ -11,6 +11,7 @@ import com.amap.api.services.geocoder.GeocodeResult;
 import com.amap.api.services.geocoder.GeocodeSearch;
 import com.amap.api.services.geocoder.RegeocodeQuery;
 import com.amap.api.services.geocoder.RegeocodeResult;
+import com.imooc.framework.utils.LogUtils;
 
 public class MapManager {
 
@@ -106,5 +107,20 @@ public class MapManager {
         void poi2address(String address);
 
         void address2poi(double la, double lo, String address);
+    }
+
+    /**
+     * 获取静态地图Url
+     *
+     * @param la 经度
+     * @param lo 维度
+     * @return 图片地址
+     */
+    public String getMapUrl(double la, double lo) {
+        String url = "https://restapi.amap.com/v3/staticmap?location=" + lo + "," + la +
+                "&zoom=17&scale=2&size=150*150&markers=mid,,A:" + lo + ","
+                + la + "&key=" + "06fa29261b07e7c938524292445baed4";
+        LogUtils.i("url:" + url);
+        return url;
     }
 }

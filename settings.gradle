@@ -12,3 +12,5 @@ rootProject.name = "Meet"
 include ':app'
 include ':framework'
 include ':IMLib'
+include ':RTCLib'
+include ':CallLib'

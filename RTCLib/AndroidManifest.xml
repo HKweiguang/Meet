@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.rongcloud.rtclib">
+    <application>
+        <meta-data
+            android:name="rc.rtclib"
+            android:value="cn.rongcloud.rtc.utils.BuildVersion" />
+    </application>
+</manifest>

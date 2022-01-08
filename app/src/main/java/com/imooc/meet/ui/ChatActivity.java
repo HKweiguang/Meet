@@ -17,6 +17,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
+import com.iflytek.cloud.RecognizerResult;
+import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.ui.RecognizerDialogListener;
 import com.imooc.framework.adapter.CommonAdapter;
 import com.imooc.framework.adapter.CommonViewHolder;
 import com.imooc.framework.base.BaseBackActivity;
@@ -26,8 +29,10 @@ import com.imooc.framework.entity.Constants;
 import com.imooc.framework.event.EventManager;
 import com.imooc.framework.event.MessageEvent;
 import com.imooc.framework.gson.TextBean;
+import com.imooc.framework.gson.VoiceBean;
 import com.imooc.framework.helper.FileHelper;
 import com.imooc.framework.manager.MapManager;
+import com.imooc.framework.manager.VoiceManager;
 import com.imooc.framework.utils.CommonUtils;
 import com.imooc.framework.utils.LogUtils;
 import com.imooc.meet.R;
@@ -396,7 +401,31 @@ public class ChatActivity extends BaseBackActivity implements View.OnClickListen
                 et_input_msg.setText("");
                 break;
             case R.id.ll_voice:
+                VoiceManager.getInstance(this).startSpeak(new RecognizerDialogListener() {
+                    @Override
+                    public void onResult(RecognizerResult recognizerResult, boolean b) {
+                        String result = recognizerResult.getResultString();
+                        if (!TextUtils.isEmpty(result)) {
+                            LogUtils.i("result:" + result);
+                            VoiceBean voiceBean = new Gson().fromJson(result, VoiceBean.class);
+                            if (voiceBean.isLs()) {
+                                StringBuilder sb = new StringBuilder();
+                                for (int i = 0; i < voiceBean.getWs().size(); i++) {
+                                    VoiceBean.WsBean wsBean = voiceBean.getWs().get(i);
+                                    String sResult = wsBean.getCw().get(0).getW();
+                                    sb.append(sResult);
+                                }
+                                LogUtils.i("result:" + sb.toString());
+                                et_input_msg.setText(sb.toString());
+                            }
+                        }
+                    }
 
+                    @Override
+                    public void onError(SpeechError speechError) {
+                        LogUtils.e("SpeechError:" + speechError.toString());
+                    }
+                });
                 break;
             case R.id.ll_camera:
                 FileHelper.getInstance().toCamera(this);

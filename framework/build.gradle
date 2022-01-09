@@ -42,6 +42,7 @@ dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
 
     api project(path: ':IMLib')
+    api project(path: ':CallLib')
 
     api rootProject.ext.dependencies["appcompat"]
     api rootProject.ext.dependencies["material"]

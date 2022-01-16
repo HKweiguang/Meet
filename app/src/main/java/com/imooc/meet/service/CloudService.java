@@ -3,8 +3,8 @@ package com.imooc.meet.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.Message;
 import android.text.TextUtils;
+import android.view.SurfaceView;
 
 import com.google.gson.Gson;
 import com.imooc.framework.bmob.BmobManager;
@@ -19,6 +19,7 @@ import com.imooc.framework.utils.CommonUtils;
 import com.imooc.framework.utils.LogUtils;
 import com.imooc.framework.utils.SpUtils;
 
+import java.util.HashMap;
 import java.util.List;
 
 import cn.bmob.v3.exception.BmobException;
@@ -28,6 +29,10 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.rong.calllib.IRongCallListener;
+import io.rong.calllib.IRongReceivedCallListener;
+import io.rong.calllib.RongCallCommon;
+import io.rong.calllib.RongCallSession;
 import io.rong.imlib.location.message.LocationMessage;
 import io.rong.message.ImageMessage;
 import io.rong.message.TextMessage;
@@ -134,6 +139,123 @@ public class CloudService extends Service {
                     break;
             }
             return false;
+        });
+
+        // 监听通话
+        CloudManager.getInstance().setReceivedCallListener(new IRongReceivedCallListener() {
+            @Override
+            public void onReceivedCall(RongCallSession callSession) {
+                LogUtils.i("onReceivedCall:" + callSession.toString());
+                if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
+                    LogUtils.i("音频通话");
+                }
+                if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.VIDEO)) {
+                    LogUtils.i("视频通话");
+                }
+            }
+
+            @Override
+            public void onCheckPermission(RongCallSession callSession) {
+                LogUtils.i("onCheckPermission:" + callSession.toString());
+            }
+        });
+
+        // 监听通话状态
+        CloudManager.getInstance().setVoIPCallListener(new IRongCallListener() {
+            @Override
+            public void onCallOutgoing(RongCallSession callSession, SurfaceView localVideo) {
+
+            }
+
+            @Override
+            public void onCallConnected(RongCallSession callSession, SurfaceView localVideo) {
+
+            }
+
+            @Override
+            public void onCallDisconnected(RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason) {
+
+            }
+
+            @Override
+            public void onRemoteUserRinging(String userId) {
+
+            }
+
+            @Override
+            public void onRemoteUserAccept(String userId, RongCallCommon.CallMediaType mediaType) {
+
+            }
+
+            @Override
+            public void onRemoteUserJoined(String userId, RongCallCommon.CallMediaType mediaType, int userType, SurfaceView remoteVideo) {
+
+            }
+
+            @Override
+            public void onRemoteUserInvited(String userId, RongCallCommon.CallMediaType mediaType) {
+
+            }
+
+            @Override
+            public void onRemoteUserLeft(String userId, RongCallCommon.CallDisconnectedReason reason) {
+
+            }
+
+            @Override
+            public void onMediaTypeChanged(String userId, RongCallCommon.CallMediaType mediaType, SurfaceView video) {
+
+            }
+
+            @Override
+            public void onError(RongCallCommon.CallErrorCode errorCode) {
+
+            }
+
+            @Override
+            public void onRemoteCameraDisabled(String userId, boolean disabled) {
+
+            }
+
+            @Override
+            public void onRemoteMicrophoneDisabled(String userId, boolean disabled) {
+
+            }
+
+            @Override
+            public void onNetworkReceiveLost(String userId, int lossRate) {
+
+            }
+
+            @Override
+            public void onNetworkSendLost(int lossRate, int delay) {
+
+            }
+
+            @Override
+            public void onFirstRemoteVideoFrame(String userId, int height, int width) {
+
+            }
+
+            @Override
+            public void onAudioLevelSend(String audioLevel) {
+
+            }
+
+            @Override
+            public void onAudioLevelReceive(HashMap<String, String> audioLevel) {
+
+            }
+
+            @Override
+            public void onRemoteUserPublishVideoStream(String userId, String streamId, String tag, SurfaceView surfaceView) {
+
+            }
+
+            @Override
+            public void onRemoteUserUnpublishVideoStream(String userId, String streamId, String tag) {
+
+            }
         });
     }
 

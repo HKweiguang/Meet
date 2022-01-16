@@ -8,8 +8,13 @@ import com.imooc.framework.utils.LogUtils;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
+import io.rong.calllib.IRongCallListener;
+import io.rong.calllib.IRongReceivedCallListener;
+import io.rong.calllib.RongCallClient;
+import io.rong.calllib.RongCallCommon;
 import io.rong.imlib.IRongCallback;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.location.message.LocationMessage;
@@ -242,5 +247,117 @@ public class CloudManager {
     public void getRemoteHistoryMessages(String targetId, RongIMClient.ResultCallback<List<Message>> callback) {
         RongIMClient.getInstance().getRemoteHistoryMessages(Conversation.ConversationType.PRIVATE
                 , targetId, 0, 20, callback);
+    }
+
+    /**
+     * ---------------------------------------------------------------------------------------------
+     */
+
+    /**
+     * 拨打音频、视频电话
+     *
+     * @param targetId 目标id
+     * @param type     类型
+     */
+    public void startCall(String targetId, RongCallCommon.CallMediaType type) {
+        List<String> userIds = new ArrayList<>();
+        userIds.add(targetId);
+        RongCallClient.getInstance().startCall(Conversation.ConversationType.PRIVATE, targetId, userIds, null, type, null);
+    }
+
+    public void startAudioCall(String targetId) {
+        startCall(targetId, RongCallCommon.CallMediaType.AUDIO);
+    }
+
+    public void startVideoCall(String targetId) {
+        startCall(targetId, RongCallCommon.CallMediaType.VIDEO);
+    }
+
+    /**
+     * 监听音视频
+     *
+     * @param listener 回调
+     */
+    public void setReceivedCallListener(IRongReceivedCallListener listener) {
+        RongCallClient.setReceivedCallListener(listener);
+    }
+
+    /**
+     * 接听
+     *
+     * @param callId 目标id
+     */
+    public void acceptCall(String callId) {
+        RongCallClient.getInstance().acceptCall(callId);
+    }
+
+    /**
+     * 挂断
+     *
+     * @param callId 目标id
+     */
+    public void hangUpCall(String callId) {
+        RongCallClient.getInstance().hangUpCall(callId);
+    }
+
+    /**
+     * 切换媒体
+     *
+     * @param mediaType 媒体类型
+     */
+    public void changeCallMediaType(RongCallCommon.CallMediaType mediaType) {
+        RongCallClient.getInstance().changeCallMediaType(mediaType);
+    }
+
+    /**
+     * 切换摄像头
+     */
+    public void switchCamera() {
+        RongCallClient.getInstance().switchCamera();
+    }
+
+    /**
+     * 摄像头开关
+     *
+     * @param enabled 开关
+     */
+    public void setEnableLocalVideo(boolean enabled) {
+        RongCallClient.getInstance().setEnableLocalVideo(enabled);
+    }
+
+    /**
+     * 音频开关
+     *
+     * @param enabled 开关
+     */
+    public void setEnableLocalAudio(boolean enabled) {
+        RongCallClient.getInstance().setEnableLocalAudio(enabled);
+    }
+
+    /**
+     * 免提开关
+     *
+     * @param enabled 开关
+     */
+    public void setEnableSpeakerphone(boolean enabled) {
+        RongCallClient.getInstance().setEnableSpeakerphone(enabled);
+    }
+
+    /**
+     * 监听通话状态
+     *
+     * @param listener 回调
+     */
+    public void setVoIPCallListener(IRongCallListener listener) {
+        RongCallClient.getInstance().setVoIPCallListener(listener);
+    }
+
+    /**
+     * 检查设备是否可通话
+     *
+     * @param context 上下文
+     */
+    public void isVoIPEnabled(Context context) {
+        RongCallClient.getInstance().isVoIPEnabled(context);
     }
 }

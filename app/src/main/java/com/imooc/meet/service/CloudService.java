@@ -3,13 +3,18 @@ package com.imooc.meet.service;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.text.TextUtils;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.imooc.framework.bmob.BmobManager;
@@ -23,9 +28,11 @@ import com.imooc.framework.event.MessageEvent;
 import com.imooc.framework.gson.TextBean;
 import com.imooc.framework.helper.GlideHelper;
 import com.imooc.framework.helper.WindowHelper;
+import com.imooc.framework.manager.MediaPlayerManager;
 import com.imooc.framework.utils.CommonUtils;
 import com.imooc.framework.utils.LogUtils;
 import com.imooc.framework.utils.SpUtils;
+import com.imooc.framework.utils.TimeUtils;
 import com.imooc.meet.R;
 
 import java.util.HashMap;
@@ -49,6 +56,27 @@ import io.rong.message.ImageMessage;
 import io.rong.message.TextMessage;
 
 public class CloudService extends Service implements View.OnClickListener {
+
+    // 计时
+    private static final int H_TIME_WHAT = 1000;
+
+    // 通话时间
+    private int callTimer = 0;
+
+    private final Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            switch (msg.what) {
+                case H_TIME_WHAT:
+                    callTimer++;
+                    String time = TimeUtils.formatDuring(callTimer * 1000);
+                    audio_tv_status.setText(time);
+                    mHandler.sendEmptyMessageDelayed(H_TIME_WHAT, H_TIME_WHAT);
+                    break;
+            }
+            return false;
+        }
+    });
 
     private Disposable disposable;
     //音频窗口
@@ -76,6 +104,12 @@ public class CloudService extends Service implements View.OnClickListener {
     //最小化
     private ImageView audio_iv_small;
 
+    // 通话ID
+    String callId = "";
+
+    private MediaPlayerManager mAudioCallMedia;
+    private MediaPlayerManager mAudioHangupMedia;
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -85,8 +119,21 @@ public class CloudService extends Service implements View.OnClickListener {
     public void onCreate() {
         super.onCreate();
 
+        initService();
         initWindow();
         linkCloudServer();
+    }
+
+    /**
+     * 初始化服务
+     */
+    private void initService() {
+        // 来电铃声
+        mAudioCallMedia = new MediaPlayerManager();
+        // 挂断
+        mAudioHangupMedia = new MediaPlayerManager();
+
+        mAudioCallMedia.setOnComplteionListener(mp -> mAudioCallMedia.startPlay(CloudManager.callAudioPath));
     }
 
     /**
@@ -201,18 +248,23 @@ public class CloudService extends Service implements View.OnClickListener {
             return false;
         });
 
-        // 监听通话
+        // 监听通话(收到电话)
         CloudManager.getInstance().setReceivedCallListener(new IRongReceivedCallListener() {
             @Override
             public void onReceivedCall(RongCallSession callSession) {
-                LogUtils.i("onReceivedCall:" + callSession.toString());
+                LogUtils.i("onReceivedCall");
+
+                // 检查设备可用
+                if (!CloudManager.getInstance().isVoIPEnabled(CloudService.this)) {
+                    return;
+                }
 
                 // 呼叫端的ID
                 String callerUserId = callSession.getCallerUserId();
                 updateWindowInfo(0, callerUserId);
 
                 // 通话ID
-                callSession.getCallId();
+                callId = callSession.getCallId();
 
                 if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
                     LogUtils.i("音频通话");
@@ -236,12 +288,14 @@ public class CloudService extends Service implements View.OnClickListener {
             // 电话播出
             @Override
             public void onCallOutgoing(RongCallSession callSession, SurfaceView localVideo) {
-                String call = new Gson().toJson(callSession);
-                LogUtils.i("onCallOutgoing:" + call);
+                LogUtils.i("onCallOutgoing");
 
                 // 更新信息
                 String targetId = callSession.getTargetId();
                 updateWindowInfo(1, targetId);
+
+                // 通话ID
+                callId = callSession.getCallId();
 
                 if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
                     LogUtils.i("音频通话");
@@ -256,15 +310,47 @@ public class CloudService extends Service implements View.OnClickListener {
             // 已建立通话
             @Override
             public void onCallConnected(RongCallSession callSession, SurfaceView localVideo) {
-                String call = new Gson().toJson(callSession);
-                LogUtils.i("onCallConnected:" + call);
+                LogUtils.i("onCallConnected");
+
+                // 关闭铃声
+                if (mAudioCallMedia.isPlaying()) {
+                    mAudioCallMedia.stopPlay();
+                }
+
+                // 开始计时
+                mHandler.sendEmptyMessage(H_TIME_WHAT);
+
+                // 更新按钮
+                if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
+                    goneAudioView(true, false, true, true, true);
+                } else if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.VIDEO)) {
+
+                }
             }
 
             // 通话结束
             @Override
             public void onCallDisconnected(RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason) {
-                String call = new Gson().toJson(callSession);
-                LogUtils.i("onCallDisconnected:" + call);
+                LogUtils.i("onCallDisconnected");
+
+                // 关闭计时
+                mHandler.removeMessages(H_TIME_WHAT);
+
+                // 铃声挂断
+                mAudioCallMedia.pausePlay();
+
+                // 播放挂断铃声
+                mAudioHangupMedia.startPlay(CloudManager.callAudioHangup);
+
+                // 重置计时器
+                callTimer = 0;
+
+                // 更新按钮
+                if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
+                    WindowHelper.getInstance().hideView(mFullAudioView);
+                } else if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.VIDEO)) {
+
+                }
             }
 
             @Override
@@ -356,6 +442,16 @@ public class CloudService extends Service implements View.OnClickListener {
      * @param id    ID
      */
     public void updateWindowInfo(int index, String id) {
+
+        if (index == 0) {
+            goneAudioView(false, true, true, false, false);
+
+            // 播放来电铃声
+            mAudioCallMedia.startPlay(CloudManager.callAudioPath);
+        } else if (index == 1) {
+            goneAudioView(false, false, true, false, false);
+        }
+
         BmobManager.getInstance().queryObjectIdUser(id, new FindListener<IMUser>() {
             @SuppressLint("SetTextI18n")
             @Override
@@ -376,6 +472,23 @@ public class CloudService extends Service implements View.OnClickListener {
         });
     }
 
+    /**
+     * 隐藏View
+     *
+     * @param recording 录音
+     * @param answer    接听
+     * @param hangup    挂断
+     * @param hf        免提
+     * @param small     最小化
+     */
+    private void goneAudioView(boolean recording, boolean answer, boolean hangup, boolean hf, boolean small) {
+        audio_ll_recording.setVisibility(recording ? View.VISIBLE : View.GONE);
+        audio_ll_answer.setVisibility(answer ? View.VISIBLE : View.GONE);
+        audio_ll_hangup.setVisibility(hangup ? View.VISIBLE : View.GONE);
+        audio_ll_hf.setVisibility(hf ? View.VISIBLE : View.GONE);
+        audio_iv_small.setVisibility(small ? View.VISIBLE : View.GONE);
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -384,8 +497,43 @@ public class CloudService extends Service implements View.OnClickListener {
         }
     }
 
+    private boolean isRecording = false;
+    private boolean isHF = false;
+
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
-
+        switch (v.getId()) {
+            case R.id.audio_ll_recording:
+                if (isRecording) {
+                    isRecording = false;
+                    CloudManager.getInstance().stopAudioRecording();
+                    audio_iv_recording.setImageResource(R.drawable.img_recording);
+                } else {
+                    isRecording = true;
+                    // 录音
+                    CloudManager.getInstance().startAudioRecording(
+                            "/sdcard/Meet/" + System.currentTimeMillis() + "wav");
+                    audio_iv_recording.setImageResource(R.drawable.img_recording_p);
+                }
+                break;
+            case R.id.audio_ll_answer:
+                // 接听
+                CloudManager.getInstance().acceptCall(callId);
+                break;
+            case R.id.audio_ll_hangup:
+                // 挂断
+                CloudManager.getInstance().hangUpCall(callId);
+                break;
+            case R.id.audio_ll_hf:
+                // 免提
+                isHF = !isHF;
+                CloudManager.getInstance().setEnableSpeakerphone(isHF);
+                audio_iv_hf.setImageResource(isHF ? R.drawable.img_hf_p : R.drawable.img_hf);
+                break;
+            case R.id.audio_iv_small:
+                // 最小化
+                break;
+        }
     }
 }

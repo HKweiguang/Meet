@@ -2,6 +2,7 @@ package com.imooc.framework.cloud;
 
 import android.content.Context;
 import android.net.Uri;
+import android.widget.Toast;
 
 import com.imooc.framework.utils.LogUtils;
 
@@ -41,6 +42,11 @@ public class CloudManager {
     public static final String TYPE_ADD_FRIEND = "TYPE_ADD_FRIEND";
     // 同意添加好友的消息
     public static final String TYPE_ARGEED_FRIEND = "TYPE_ARGEED_FRIEND";
+
+    //来电铃声
+    public static final String callAudioPath = "http://downsc.chinaz.net/Files/DownLoad/sound1/201501/5363.wav";
+    //挂断铃声
+    public static final String callAudioHangup = "http://downsc.chinaz.net/Files/DownLoad/sound1/201501/5351.wav";
 
     private static volatile CloudManager mInstance = null;
 
@@ -265,11 +271,19 @@ public class CloudManager {
         RongCallClient.getInstance().startCall(Conversation.ConversationType.PRIVATE, targetId, userIds, null, type, null);
     }
 
-    public void startAudioCall(String targetId) {
+    public void startAudioCall(Context mContext, String targetId) {
+        // 检查设备可用
+        if (!isVoIPEnabled(mContext)) {
+            return;
+        }
         startCall(targetId, RongCallCommon.CallMediaType.AUDIO);
     }
 
-    public void startVideoCall(String targetId) {
+    public void startVideoCall(Context mContext, String targetId) {
+        // 检查设备可用
+        if (!isVoIPEnabled(mContext)) {
+            return;
+        }
         startCall(targetId, RongCallCommon.CallMediaType.VIDEO);
     }
 
@@ -279,6 +293,9 @@ public class CloudManager {
      * @param listener 回调
      */
     public void setReceivedCallListener(IRongReceivedCallListener listener) {
+        if (listener == null) {
+            return;
+        }
         RongCallClient.setReceivedCallListener(listener);
     }
 
@@ -344,11 +361,28 @@ public class CloudManager {
     }
 
     /**
+     * 开启录音
+     *
+     * @param filePath
+     */
+    public void startAudioRecording(String filePath) {
+    }
+
+    /**
+     * 关闭录音
+     */
+    public void stopAudioRecording() {
+    }
+
+    /**
      * 监听通话状态
      *
      * @param listener 回调
      */
     public void setVoIPCallListener(IRongCallListener listener) {
+        if (listener == null) {
+            return;
+        }
         RongCallClient.getInstance().setVoIPCallListener(listener);
     }
 
@@ -357,7 +391,11 @@ public class CloudManager {
      *
      * @param context 上下文
      */
-    public void isVoIPEnabled(Context context) {
-        RongCallClient.getInstance().isVoIPEnabled(context);
+    public boolean isVoIPEnabled(Context context) {
+        if (RongCallClient.getInstance().isVoIPEnabled(context)) {
+            Toast.makeText(context, "设备不支持音视频通话", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

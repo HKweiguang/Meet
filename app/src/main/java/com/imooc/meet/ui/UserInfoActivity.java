@@ -19,12 +19,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.imooc.framework.adapter.CommonAdapter;
 import com.imooc.framework.adapter.CommonViewHolder;
 import com.imooc.framework.base.BaseUIActivity;
+import com.imooc.framework.bmob.BmobManager;
 import com.imooc.framework.bmob.Friend;
 import com.imooc.framework.bmob.IMUser;
 import com.imooc.framework.cloud.CloudManager;
 import com.imooc.framework.entity.Constants;
 import com.imooc.framework.helper.GlideHelper;
-import com.imooc.framework.bmob.BmobManager;
 import com.imooc.framework.manager.DialogManager;
 import com.imooc.framework.utils.CommonUtils;
 import com.imooc.framework.utils.LogUtils;
@@ -38,7 +38,6 @@ import java.util.List;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.rong.calllib.RongCallCommon;
 
 public class UserInfoActivity extends BaseUIActivity implements View.OnClickListener {
 
@@ -221,10 +220,10 @@ public class UserInfoActivity extends BaseUIActivity implements View.OnClickList
                 ChatActivity.startActivity(this, imUser.getObjectId(), imUser.getNickName(), imUser.getPhoto());
                 break;
             case R.id.btn_audio_chat:
-                CloudManager.getInstance().startAudioCall(userId);
+                CloudManager.getInstance().startAudioCall(UserInfoActivity.this, userId);
                 break;
             case R.id.btn_video_chat:
-                CloudManager.getInstance().startVideoCall(userId);
+                CloudManager.getInstance().startVideoCall(UserInfoActivity.this, userId);
                 break;
             case R.id.tv_cancel:
                 DialogManager.getInstance().hide(addFriendDialog);
